@@ -12,6 +12,7 @@ The CSV can be used to graph how busy a DMV location is over time. I made this t
 Requirements: Docker, Bash
 
 Run app in docker:
+
 `make build`
 
 `make run`
@@ -21,6 +22,10 @@ This will output the CSV in the `output` folder
 ## Local development
 
 `make setup`
+
+`source .venv/bin/activate`
+
+`python src/main.py`
 
 ## Analysis
 
