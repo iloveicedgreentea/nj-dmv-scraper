@@ -1,0 +1,6 @@
+.git
+README*
+Dockerfile
+output
+.vscode
+.venv
