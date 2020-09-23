@@ -6,6 +6,8 @@ It writes data to a CSV - location, time it was detected to be full, and the dat
 
 The CSV can be used to graph how busy a DMV location is over time. I made this to quickly see which DMV to go to.
 
+Locations with a time of "23:59" never got marked full that day
+
 This is designed to run as a scheduled job, as quickly as you want before you get IP banned. 
 
 
@@ -25,6 +27,8 @@ Run app in docker:
 `make run`
 
 This will output the CSV in the `output` folder
+
+Run `run.sh` for a simple script that will poll every 30s
 
 ## Local development
 
