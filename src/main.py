@@ -6,7 +6,7 @@ import requests
 import logging
 from sys import exit
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # CSV schema
 csv_file_name = "output/data.csv"
