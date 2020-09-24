@@ -26,6 +26,7 @@ weekday =  DT.datetime.today().weekday()
 
 # dmv closes at 430 est on weekday
 weekday_end_time = "16:30"
+open_time = "8:00"
 saturday_end_time = "15:00"
 
 #check if sunday, dont run
@@ -110,16 +111,17 @@ with open(csv_file_name, 'r+', newline='') as file:
       new_entries.append(location)
 
   #if its the end of the day and an entry isn't present, write it as 23:59 to show it did not get full that day, but still have it for analytics
+  # Also don't write a location if its closed, like at midnight
   for location in empty_locations:
     if check_rows(reader, location, close_flag=True):
       break
     # if saturday
     if weekday == 5:
-      if now > saturday_end_time:
+      if now > saturday_end_time and now > open_time:
           writer.writerow([location, "23:59", today])
     # if weekday
     else:
-      if now > weekday_end_time:
+      if now > weekday_end_time and now > open_time:
           writer.writerow([location, "23:59", today])
 
 logging.info(f"Locations added: {len(new_entries)}")
