@@ -1,9 +1,10 @@
 from os import getenv, path, mkdir
-from datetime import date, datetime
+import datetime as DT
 import csv
 from bs4 import BeautifulSoup
 import requests
 import logging
+import pytz
 from sys import exit
 
 logging.basicConfig(level=logging.INFO)
@@ -16,9 +17,12 @@ csv_headers = ["location", "time_full", "date"]
 url = getenv("MAINSITE", "https://www.state.nj.us/mvc/locations/agency.htm")
 
 # Get timestamp
-today = date.today()
-now = datetime.now().strftime("%H:%M")
-weekday =  datetime.today().weekday()
+eastern = pytz.timezone('US/Eastern')
+today = DT.date.today()
+# get utc now, convert to eastern TZ preserving DST
+utc_now = DT.datetime.strptime(DT.datetime.now().strftime("%H:%M"), "%H:%M")
+now = eastern.localize(utc_now).strftime("%H:%M")
+weekday =  DT.datetime.today().weekday()
 
 # dmv closes at 430 est on weekday
 weekday_end_time = "16:30"
@@ -78,6 +82,7 @@ def check_rows(reader, location, close_flag=False):
           logging.debug("Entry already in database")
           return True
 
+
 # open csv for RW
 with open(csv_file_name, 'r+', newline='') as file:
   writer = csv.writer(file)
@@ -100,6 +105,7 @@ with open(csv_file_name, 'r+', newline='') as file:
     # if the entry is not found, write it
     if not entry_exists:
       logging.info(f"New location detected: {location}")
+      
       writer.writerow([location, now, today])
       new_entries.append(location)
 
