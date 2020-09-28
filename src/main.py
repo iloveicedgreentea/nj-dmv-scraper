@@ -82,6 +82,14 @@ def check_rows(row, location, close_flag=False):
         logging.debug("Entry already in database")
         return True
 
+def check_if_open(now):
+  if weekday == 5:
+      if now > saturday_end_time and now > open_time and not entry_exists:
+          return True
+  # if weekday
+  else:
+    if now > weekday_end_time and now > open_time and not entry_exists:
+        return True
 
 # open csv for RW
 with open(csv_file_name, 'r+', newline='') as file:
@@ -119,18 +127,15 @@ with open(csv_file_name, 'r+', newline='') as file:
       if check_rows(row, location, close_flag=True):
         entry_exists = True
         break
-    # if saturday
     #todo: this isn't working
-    if weekday == 5:
-      if now > saturday_end_time and now > open_time and not entry_exists:
-          writer.writerow([location, "23:59", today])
-    # if weekday
-    else:
-      if now > weekday_end_time and now > open_time and not entry_exists:
-          writer.writerow([location, "23:59", today])
+    if check_if_open(now) and not entry_exists:
+      writer.writerow([location, "23:59", today])
+
+
 
 logging.info(f"Locations added: {len(new_entries)}")
 logging.info(f"Locations still open: {len(empty_locations)}")
+logging.info(now)
 
 #todo: see if its a vehicle or license center
 #todo: twitter or some other kind of notification
