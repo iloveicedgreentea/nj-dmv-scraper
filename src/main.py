@@ -66,22 +66,21 @@ for location in full_locations:
 
 
 
-def check_rows(reader, location, close_flag=False):
-  for row in reader:
-    # this will be really slow as the file gets bigger
-      logging.debug(f"checking row {location}")
-      logging.debug(f"{row[0]},{row[2]}")
+def check_rows(row, location, close_flag=False):
+  # this will be really slow as the file gets bigger
+    logging.debug(f"checking row {location}")
+    logging.debug(f"{row[0]},{row[2]}")
 
-      if close_flag:
-        # If an entry was found return true
-        if row[0] == location and "23:59" in row[1]:
-          logging.debug("Entry already in database")
-          return True
-      else:
-        # If an entry was found return true
-        if row[0] == location and str(today) == row[2]:
-          logging.debug("Entry already in database")
-          return True
+    if close_flag:
+      # If an entry was found return true
+      if row[0] == location and "23:59" in row[1]:
+        logging.debug("Entry already in database")
+        return True
+    else:
+      # If an entry was found return true
+      if row[0] == location and str(today) == row[2]:
+        logging.debug("Entry already in database")
+        return True
 
 
 # open csv for RW
@@ -100,8 +99,10 @@ with open(csv_file_name, 'r+', newline='') as file:
     entry_exists = False
     
     # for each row in the current csv, check if the data was already written today
-    if check_rows(reader, location):
-      break
+    for row in reader:
+      if check_rows(row, location):
+        entry_exists = True
+        break
 
     # if the entry is not found, write it
     if not entry_exists:
@@ -112,16 +113,20 @@ with open(csv_file_name, 'r+', newline='') as file:
 
   #if its the end of the day and an entry isn't present, write it as 23:59 to show it did not get full that day, but still have it for analytics
   # Also don't write a location if its closed, like at midnight
+  entry_exists = False
   for location in empty_locations:
-    if check_rows(reader, location, close_flag=True):
-      break
+    for row in reader:
+      if check_rows(row, location, close_flag=True):
+        entry_exists = True
+        break
     # if saturday
+    #todo: this isn't working
     if weekday == 5:
-      if now > saturday_end_time and now > open_time:
+      if now > saturday_end_time and now > open_time and not entry_exists:
           writer.writerow([location, "23:59", today])
     # if weekday
     else:
-      if now > weekday_end_time and now > open_time:
+      if now > weekday_end_time and now > open_time and not entry_exists:
           writer.writerow([location, "23:59", today])
 
 logging.info(f"Locations added: {len(new_entries)}")
