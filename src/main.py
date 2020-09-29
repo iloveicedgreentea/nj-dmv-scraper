@@ -26,7 +26,7 @@ weekday =  DT.datetime.today().weekday()
 
 # dmv closes at 430 est on weekday
 weekday_end_time = "16:30"
-open_time = "8:00"
+open_time = "08:00"
 saturday_end_time = "15:00"
 
 #check if sunday, dont run
@@ -73,7 +73,7 @@ def check_rows(row, location, close_flag=False):
 
     if close_flag:
       # If an entry was found return true
-      if row[0] == location and "23:59" in row[1]:
+      if row[0] == location and "23:59" in row[1] and str(today) == row[2]:
         logging.debug("Entry already in database")
         return True
     else:
@@ -84,11 +84,11 @@ def check_rows(row, location, close_flag=False):
 
 def check_if_open(now):
   if weekday == 5:
-      if now > saturday_end_time and now > open_time and not entry_exists:
+      if now < saturday_end_time and now > open_time:
           return True
   # if weekday
   else:
-    if now > weekday_end_time and now > open_time and not entry_exists:
+    if now < weekday_end_time and now > open_time:
         return True
 
 # open csv for RW
@@ -121,21 +121,21 @@ with open(csv_file_name, 'r+', newline='') as file:
 
   #if its the end of the day and an entry isn't present, write it as 23:59 to show it did not get full that day, but still have it for analytics
   # Also don't write a location if its closed, like at midnight
-  entry_exists = False
-  for location in empty_locations:
-    for row in reader:
-      if check_rows(row, location, close_flag=True):
-        entry_exists = True
-        break
-    #todo: this isn't working
-    if check_if_open(now) and not entry_exists:
-      writer.writerow([location, "23:59", today])
-
-
+  #todo: dmv sometimes resets all fields after closing so this is pointless
+  # entry_exists = False
+  # for location in empty_locations:
+  #   for row in reader:
+  #     if check_rows(row, location, close_flag=True):
+  #       entry_exists = True
+  #       break
+  #   if check_if_open(now) and not entry_exists:
+  #     writer.writerow([location, "23:59", today])
 
 logging.info(f"Locations added: {len(new_entries)}")
 logging.info(f"Locations still open: {len(empty_locations)}")
-logging.info(now)
+logging.info(f"Local Time is {now}")
+if not check_if_open(now):
+  logging.info("DMV is closed")
 
 #todo: see if its a vehicle or license center
 #todo: twitter or some other kind of notification
