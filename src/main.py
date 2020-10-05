@@ -113,7 +113,7 @@ with open(csv_file_name, 'r+', newline='') as file:
         break
 
     # if the entry is not found, write it
-    if not entry_exists:
+    if not entry_exists and check_if_open(now):
       logging.info(f"New location detected: {location}")
       
       writer.writerow([location, now, today])
